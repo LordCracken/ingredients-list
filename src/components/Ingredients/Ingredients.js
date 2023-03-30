@@ -1,18 +1,46 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import IngredientForm from './IngredientForm';
 import Search from './Search';
 import IngredientList from './IngredientList';
 
+import useSendIngredient from '../../hooks/useSendIngredient';
+
+const url =
+  'https://react-hooks-ingredients-bddee-default-rtdb.europe-west1.firebasedatabase.app/ingredients.json';
+
 const Ingredients = () => {
-  const [ingredients, setIngredient] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
+  const { fetchedIngredient, sendIngredient } = useSendIngredient();
+
+  useEffect(() => {
+    const getIngredients = async () => {
+      const response = await fetch(url);
+      const resData = await response.json();
+      const loadedIngredients = [];
+
+      for (const key in resData) {
+        loadedIngredients.push({ id: key, title: resData[key].title, amount: resData[key].amount });
+      }
+
+      setIngredients(loadedIngredients);
+    };
+
+    getIngredients();
+  }, []);
+
+  useEffect(() => {
+    if (fetchedIngredient) {
+      setIngredients(prevIngredients => [...prevIngredients, fetchedIngredient]);
+    }
+  }, [fetchedIngredient]);
 
   const addIngredientHandler = ingredient => {
-    setIngredient(prevIngredients => [...prevIngredients, { id: ingredient.title, ...ingredient }]);
+    sendIngredient(ingredient);
   };
 
   const removeIngredientHandler = id => {
-    setIngredient(prevIngredients => prevIngredients.filter(ig => ig.id !== id));
+    setIngredients(prevIngredients => prevIngredients.filter(ig => ig.id !== id));
   };
 
   return (
