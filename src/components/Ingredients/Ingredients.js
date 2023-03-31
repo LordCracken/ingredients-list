@@ -1,66 +1,45 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import IngredientForm from './IngredientForm';
 import Search from './Search';
 import IngredientList from './IngredientList';
-
-import useSendIngredient from '../../hooks/useSendIngredient';
-import useRemoveIngredient from '../../hooks/useRemoveIngredient';
 import ErrorModal from '../UI/ErrorModal';
+
+import useHttp from '../../hooks/useHttp';
+
+const url = 'https://react-hooks-ingredients-bddee-default-rtdb.europe-west1.firebasedatabase.app';
 
 const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
 
-  const {
-    fetchedIngredient,
-    isLoading: isSendLoading,
-    error: sendError,
-    sendIngredient,
-    clearError: clearSendError,
-  } = useSendIngredient();
-  const {
-    ingredientId,
-    isLoading: isRemoveLoading,
-    error: removeError,
-    removeIngredient,
-    clearError: clearRemoveError,
-  } = useRemoveIngredient();
-
-  const isLoading = isSendLoading || isRemoveLoading;
-  const isError = Boolean(sendError || removeError);
-
-  useEffect(() => {
-    if (fetchedIngredient) {
-      setIngredients(prevIngredients => [...prevIngredients, fetchedIngredient]);
-    }
-  }, [fetchedIngredient]);
-
-  useEffect(() => {
-    if (ingredientId) {
-      setIngredients(prevIngredients => prevIngredients.filter(ig => ig.id !== ingredientId));
-    }
-  }, [ingredientId]);
+  const { isLoading, error, sendRequest: fetchIngredients, clearError } = useHttp();
 
   const filteredIngredientsHandler = useCallback(filteredIngredients => {
     setIngredients(filteredIngredients);
   }, []);
 
   const addIngredientHandler = ingredient => {
-    sendIngredient(ingredient);
+    const { title, amount } = ingredient;
+    const headers = { 'Content-Type': 'application/json' };
+    fetchIngredients(
+      { url: `${url}/ingredients.json`, method: 'POST', headers, body: ingredient },
+      data => {
+        console.log(data);
+        const fetchedIngredient = { id: data.name, title, amount };
+        setIngredients(prevIngredients => [...prevIngredients, fetchedIngredient]);
+      },
+    );
   };
 
   const removeIngredientHandler = id => {
-    removeIngredient(id);
-  };
-
-  const clearErrors = () => {
-    clearSendError();
-    clearRemoveError();
+    fetchIngredients({ url: `${url}/ingredients/${id}.json`, method: 'DELETE' }, () => {
+      setIngredients(prevIngredients => prevIngredients.filter(ig => ig.id !== id));
+    });
   };
 
   return (
     <div className="App">
-      {isError && <ErrorModal onClose={clearErrors}>{sendError || removeError}</ErrorModal>}
+      {!!error && <ErrorModal onClose={clearError}>{error}</ErrorModal>}
 
       <IngredientForm onAddIngredient={addIngredientHandler} loading={isLoading} />
 
