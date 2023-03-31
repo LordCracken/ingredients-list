@@ -6,11 +6,28 @@ import IngredientList from './IngredientList';
 
 import useSendIngredient from '../../hooks/useSendIngredient';
 import useRemoveIngredient from '../../hooks/useRemoveIngredient';
+import ErrorModal from '../UI/ErrorModal';
 
 const Ingredients = () => {
   const [ingredients, setIngredients] = useState([]);
-  const { fetchedIngredient, sendIngredient } = useSendIngredient();
-  const { ingredientId, removeIngredient } = useRemoveIngredient();
+
+  const {
+    fetchedIngredient,
+    isLoading: isSendLoading,
+    error: sendError,
+    sendIngredient,
+    clearError: clearSendError,
+  } = useSendIngredient();
+  const {
+    ingredientId,
+    isLoading: isRemoveLoading,
+    error: removeError,
+    removeIngredient,
+    clearError: clearRemoveError,
+  } = useRemoveIngredient();
+
+  const isLoading = isSendLoading || isRemoveLoading;
+  const isError = Boolean(sendError || removeError);
 
   useEffect(() => {
     if (fetchedIngredient) {
@@ -36,9 +53,16 @@ const Ingredients = () => {
     removeIngredient(id);
   };
 
+  const clearErrors = () => {
+    clearSendError();
+    clearRemoveError();
+  };
+
   return (
     <div className="App">
-      <IngredientForm onAddIngredient={addIngredientHandler} />
+      {isError && <ErrorModal onClose={clearErrors}>{sendError || removeError}</ErrorModal>}
+
+      <IngredientForm onAddIngredient={addIngredientHandler} loading={isLoading} />
 
       <section>
         <Search onLoadIngredients={filteredIngredientsHandler} />

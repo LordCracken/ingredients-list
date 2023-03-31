@@ -5,9 +5,19 @@ const url =
 
 const useSendIngredient = () => {
   const [ingredientId, setIngredientId] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const removeIngredient = async () => {
-    await fetch(`${url}/${ingredientId}.json`, { method: 'DELETE' });
+    setIsLoading(true);
+
+    try {
+      await fetch(`${url}/${ingredientId}.json`, { method: 'DELETE' });
+    } catch (_e) {
+      setError('Something went wrong!');
+    }
+
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -18,8 +28,13 @@ const useSendIngredient = () => {
 
   return {
     ingredientId,
+    isLoading,
+    error,
     removeIngredient: id => {
       setIngredientId(id);
+    },
+    clearError: () => {
+      setError('');
     },
   };
 };
