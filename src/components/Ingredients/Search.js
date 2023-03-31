@@ -3,10 +3,9 @@ import { memo, useEffect, useRef, useState } from 'react';
 import Card from '../UI/Card';
 import './Search.css';
 
-const url =
-  'https://react-hooks-ingredients-bddee-default-rtdb.europe-west1.firebasedatabase.app/ingredients.json';
+const url = 'https://react-hooks-ingredients-bddee-default-rtdb.europe-west1.firebasedatabase.app';
 
-const Search = ({ onLoadIngredients }) => {
+const Search = ({ fetchIngredients, onLoadIngredients }) => {
   const [filter, setFilter] = useState('');
   const inputRef = useRef();
 
@@ -15,23 +14,19 @@ const Search = ({ onLoadIngredients }) => {
       if (filter === inputRef.current.value) {
         const query = filter.length ? `?orderBy="title"&equalTo="${filter}"` : '';
 
-        const getIngredients = async () => {
-          const response = await fetch(url + query);
-          const resData = await response.json();
+        fetchIngredients({ url: `${url}/ingredients.json${query}` }, data => {
           const loadedIngredients = [];
 
-          for (const key in resData) {
+          for (const key in data) {
             loadedIngredients.push({
               id: key,
-              title: resData[key].title,
-              amount: resData[key].amount,
+              title: data[key].title,
+              amount: data[key].amount,
             });
           }
 
           onLoadIngredients(loadedIngredients);
-        };
-
-        getIngredients();
+        });
       }
     }, 500);
 

@@ -14,7 +14,7 @@ const Ingredients = () => {
 
   const { isLoading, error, sendRequest: fetchIngredients, clearError } = useHttp();
 
-  const filteredIngredientsHandler = useCallback(filteredIngredients => {
+  const filterIngredientsHandler = useCallback(filteredIngredients => {
     setIngredients(filteredIngredients);
   }, []);
 
@@ -44,7 +44,7 @@ const Ingredients = () => {
       <IngredientForm onAddIngredient={addIngredientHandler} loading={isLoading} />
 
       <section>
-        <Search onLoadIngredients={filteredIngredientsHandler} />
+        <Search fetchIngredients={fetchIngredients} onLoadIngredients={filterIngredientsHandler} />
         <IngredientList ingredients={ingredients} onRemoveItem={removeIngredientHandler} />
       </section>
     </div>
