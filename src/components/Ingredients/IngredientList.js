@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import './IngredientList.css';
 
 const IngredientList = ({ ingredients, onRemoveItem }) => {
@@ -16,4 +17,4 @@ const IngredientList = ({ ingredients, onRemoveItem }) => {
   );
 };
 
-export default IngredientList;
+export default memo(IngredientList);

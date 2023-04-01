@@ -18,7 +18,7 @@ const Ingredients = () => {
     setIngredients(filteredIngredients);
   }, []);
 
-  const addIngredientHandler = ingredient => {
+  const addIngredientHandler = useCallback(ingredient => {
     const { title, amount } = ingredient;
     const headers = { 'Content-Type': 'application/json' };
     fetchIngredients(
@@ -29,13 +29,13 @@ const Ingredients = () => {
         setIngredients(prevIngredients => [...prevIngredients, fetchedIngredient]);
       },
     );
-  };
+  }, []);
 
-  const removeIngredientHandler = id => {
+  const removeIngredientHandler = useCallback(id => {
     fetchIngredients({ url: `${url}/ingredients/${id}.json`, method: 'DELETE' }, () => {
       setIngredients(prevIngredients => prevIngredients.filter(ig => ig.id !== id));
     });
-  };
+  }, []);
 
   return (
     <div className="App">
